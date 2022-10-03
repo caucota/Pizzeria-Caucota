@@ -1,0 +1,118 @@
+/*GENERALES*/
+*{
+    margin: 0%;
+    padding: 0%;
+    box-sizing: border-box;
+}
+
+/*TITULO*/
+.titulo{
+    background-color: rgb(191, 44, 44);
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid white;
+}
+
+h1{
+    color: black;
+    text-shadow: 0 0 0.2em rgb(41, 39, 39), 0 0 0.2em rgb(41, 39, 39), 0 0 0.2em rgb(41, 39, 39);
+}
+
+/*SECTION 1*/
+.section-uno{
+    background-color: black;
+    padding-bottom: 5%;
+}
+
+.div-cards{
+    display: flex;
+    justify-content: space-evenly;
+}
+
+h2{
+    color: white;
+    text-decoration: underline;
+    padding: 2%;
+}
+
+h3{
+    font-size: 50px !important;
+    text-align: center;
+    padding-top: 5%;
+    padding-bottom: 5%;
+    color: rgb(191, 44, 44);
+    text-shadow: 0 0 0.2em rgb(191, 44, 44), 0 0 0.2em rgb(191, 44, 44), 0 0 0.2em rgb(191, 44, 44);
+}
+
+/*SECTION 2*/
+.section-2{
+    color: black;
+    background-color: rgb(191, 44, 44);
+}
+
+h4{
+    font-size: 30px !important;
+    text-decoration: underline;
+    padding: 2%;
+}
+
+.input-group{
+    width: 48% !important;
+}
+
+.conteiner-forma-pago{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.div-forma-pago{
+    width: 87% !important;
+    padding-top: 5%;
+}
+
+.div-input-group{
+    display: flex;
+    justify-content: space-evenly;
+    width: 89.5% !important;
+}
+
+.div-domicilio-total{
+    padding-top: 5% !important;
+}
+
+.div-conteiner-input-group{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 2%;
+}
+
+.div-boton{
+    display: flex;
+    justify-content: space-evenly;
+    padding: 2%;
+}
+
+.boton-forma-pago{
+    padding: 1% 4% 1% 4% !important;
+}
+
+span{
+    background-color: rgb(37, 34, 34) !important;
+    border-color: black !important;
+}
+
+.btn-outline-secondary{
+    background-color: rgb(37, 34, 34) !important;
+    color: white !important;
+    border-color: black !important;
+}
+
+input{
+    border-color: black !important;
+}
