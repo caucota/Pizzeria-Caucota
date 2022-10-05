@@ -116,3 +116,18 @@ span{
 input{
     border-color: black !important;
 }
+
+
+
+
+
+
+#catalogo{
+    background-color: aquamarine;
+    height: 100px;
+}
+
+.tituloCard{
+    background-color: black;
+
+}

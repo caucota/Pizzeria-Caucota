@@ -1,3 +1,4 @@
+/*
 let primerMensaje = "Ingrese el numero del producto que desea comprar: ";
 let listaProductos = "\n1- Pizzas\n2- Empanadas\n3- Lomitos\n4- Finalizar Compra";
 let opcionCancelar = "\n5- Cancelar Compra";
@@ -35,6 +36,16 @@ let articulosPedidos = "";
 let mensajeFinal = "En total serían: $";
 let primerPrecio = "Hasta ahora son: $";
 
+
+let arrayProductos = [pizzaA, pizzaB, empanadaA, empanadaB, lomitoA, lomitoB];
+let catalogo = document.getElementById("catalogo");
+
+for (const prod of arrayProductos){
+    let card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `<h2 class="tituloCard">Nombre: ${prod.nombre}</h2><p>Precio: $${prod.precio}</p>`
+    catalogo.append(card);
+}
 
 while(cicloCompra) {
     let productoElegido = prompt (primerMensaje + listaProductos + "\n Total:$" + precioTotal);
@@ -151,7 +162,8 @@ if (precioTotal > 0) {
     }
     
     alert("Gracias por tu compra " + nombreCliente);
-    document.getElementById("totalAPagarInput").value = "$" + precioTotal;
+    //document.getElementById("totalAPagarInput").value = "$" + precioTotal;
+    document.getElementById("totalAPagarInput").innerText = "$" + precioTotal;
     document.getElementById("formPagoInput").value = opcionesFormaPago;
     document.getElementById("nombreInput").value = nombreCliente;
     document.getElementById("apellidoInput").value = apellidoCliente;
@@ -161,3 +173,101 @@ if (precioTotal > 0) {
     alert("Gracias por tu visita. Te esperamos..")
 }
     
+*/
+
+
+//TIENDA
+
+let precioTotal = 0
+let totalFinal = 0
+
+function Producto(nombre,precio,stock){
+    this.nombre = nombre;
+    this.precio = precio;
+    this.stock = stock;
+    this.restarStock = function(cantidad){ // recibe como parametro la cantidad, creo metodo para actualizar stock
+        this.stock -= cantidad
+    }
+}
+
+function calculadoraPrecioTotal (cantidadReloj,reloj){
+    precioTotal = cantidadReloj * reloj
+    totalFinal = totalFinal  + precioTotal
+    alert("El precio total es $" + precioTotal)
+}
+
+let reloj1 = new Producto("Reloj Automatico",100,5)
+let reloj2 = new Producto("Reloj a Cuerda",200,5)
+let reloj3 = new Producto("Reloj con Calendario",300,5)
+let reloj4 = new Producto("Reloj con Segundero",400,5)
+
+let listaProductos = [reloj1,reloj2,reloj3,reloj4]
+let resumenCompra = []
+
+let cantidadCompra = prompt("Hola, ingrese la cantidad de productos que desea que comprar!!")
+
+for(let i = 0; i < cantidadCompra; i++){
+
+    let reloj = prompt("Seleccione un producto: \n1 - Reloj Automatico\n2 - Reloj a Cuerda\n3 - Reloj con Calendario\n4 - Reloj con Segundero\n5 - Salir")
+
+    while(reloj != 5){
+        if(reloj == 1 ){
+            let cantidadReloj = prompt("¿Cuantos " + reloj1.nombre + " desea comprar?")
+            if (cantidadReloj <= reloj1.stock){
+                calculadoraPrecioTotal (cantidadReloj,reloj1.precio)
+                // reloj1.restarStock(reloj1.stock)
+                resumenCompra.push(reloj1.precio * cantidadReloj)
+                break;
+            }
+            else{
+                alert("No tenemos suficiente stock, la cantidad de stock es de " + reloj1.stock + " unidades.")
+            }
+        }
+        else if (reloj == 2 ){
+            let cantidadReloj = prompt("¿Cuantos " + reloj2.nombre + " desea comprar?")
+            if (cantidadReloj <= reloj2.stock){
+                calculadoraPrecioTotal(cantidadReloj,reloj2.precio)
+                // reloj2.restarStock(reloj2.stock)
+                resumenCompra.push(reloj2.precio * cantidadReloj)
+                break;
+            }
+            else{
+                alert("No tenemos suficiente stock, la cantidad de stock es de " + reloj2.stock + " unidades.")
+            }
+        }
+        else if (reloj == 3 ){
+            let cantidadReloj = prompt("¿Cuantos " + reloj3.nombre + " desea comprar?")
+            if (cantidadReloj <= reloj3.stock){
+                calculadoraPrecioTotal(cantidadReloj,reloj3.precio)
+                // reloj3.restarStock(reloj3.stock)
+                resumenCompra.push(reloj3.precio * cantidadReloj)
+                break;
+            }
+            else{
+                alert("No tenemos suficiente stock, la cantidad de stock es de " + reloj3.stock + " unidades.")
+            }
+        }
+        else if (reloj == 4 ){
+            let cantidadReloj = prompt("¿Cuantos " + reloj4.nombre + " desea comprar?")
+            if (cantidadReloj <= reloj4.stock){
+                calculadoraPrecioTotal(cantidadReloj,reloj4.precio)
+                // reloj4.restarStock(reloj4.stock)
+                resumenCompra.push(reloj4.precio * cantidadReloj)
+                break;
+            }
+            else{
+                alert("No tenemos suficiente stock, la cantidad de stock es de " + reloj4.stock + " unidades.")
+            }
+        }
+        else{
+            alert("Ingrese una opcion valida")
+            break;
+        }
+    }
+}
+totalFinal = 0;
+for(const resumen of resumenCompra){
+	totalFinal = totalFinal + resumen;
+}
+alert("El total final a pagar a pagar es de: $" + totalFinal)
+alert("Gracias por su compra")
