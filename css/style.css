@@ -22,8 +22,15 @@ h1{
 
 /*SECTION 1*/
 .section-uno{
+    height: auto;
     background-color: black;
     padding-bottom: 5%;
+    display: grid;
+    grid-template-areas: 
+    "busqueda busqueda"
+    "cards carrito";
+    grid-template-columns: 60% 40%;
+    grid-template-rows: 5% 40%;
 }
 
 .div-cards{
@@ -31,10 +38,26 @@ h1{
     justify-content: space-evenly;
 }
 
-h2{
-    color: white;
-    text-decoration: underline;
-    padding: 2%;
+.subtitulo-busqueda{
+    grid-area: busqueda;
+    display: flex;
+    justify-content: space-between;
+}
+
+.d-flex{
+    height: 90%;
+    padding-top: 2%;
+    padding-right: 2%;
+}
+
+.btn-group{
+    height: 100%;
+    padding-left: 2%;
+    padding-top: 2%;
+}
+
+.btn-group>.btn{
+    font-size: 25px;
 }
 
 h3{
@@ -44,6 +67,23 @@ h3{
     padding-bottom: 5%;
     color: rgb(191, 44, 44);
     text-shadow: 0 0 0.2em rgb(191, 44, 44), 0 0 0.2em rgb(191, 44, 44), 0 0 0.2em rgb(191, 44, 44);
+}
+
+.contenedor-cards{
+    grid-area: cards;
+}
+
+.carrito-compras{
+    border-radius: 2%;
+    border: 2px solid rgb(191, 44, 44);
+    grid-area: carrito;
+    background-color: white;
+    margin-top: 10%;
+    width: 90%;
+    height: 50%;
+    padding: 5% 0% 0% 5%;
+    top: 5%;
+    position: sticky;
 }
 
 /*SECTION 2*/
@@ -59,7 +99,7 @@ h4{
 }
 
 .input-group{
-    width: 48% !important;
+    width: 40% !important;
 }
 
 .conteiner-forma-pago{
@@ -77,24 +117,11 @@ h4{
 .div-input-group{
     display: flex;
     justify-content: space-evenly;
-    width: 89.5% !important;
-}
-
-.div-domicilio-total{
-    padding-top: 5% !important;
-}
-
-.div-conteiner-input-group{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding-top: 2%;
 }
 
 .div-boton{
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
     padding: 2%;
 }
 
@@ -115,19 +142,4 @@ span{
 
 input{
     border-color: black !important;
-}
-
-
-
-
-
-
-#catalogo{
-    background-color: aquamarine;
-    height: 100px;
-}
-
-.tituloCard{
-    background-color: black;
-
 }
