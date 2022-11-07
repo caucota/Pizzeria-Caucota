@@ -5,6 +5,13 @@
     box-sizing: border-box;
 }
 
+.card{
+    width: 15rem;
+    height: 25rem;
+    text-align: center;
+}
+
+
 /*TITULO*/
 .titulo{
     background-color: rgb(191, 44, 44);
@@ -42,6 +49,7 @@ h1{
     grid-area: busqueda;
     display: flex;
     justify-content: space-between;
+    height: 82px;
 }
 
 .d-flex{
@@ -73,20 +81,45 @@ h3{
     grid-area: cards;
 }
 
-.carrito-compras{
+#carrito-compras{
     border-radius: 2%;
     border: 2px solid rgb(191, 44, 44);
     grid-area: carrito;
     background-color: white;
     margin-top: 10%;
     width: 90%;
-    height: 50%;
+    height: 85%;
     padding: 5% 0% 0% 5%;
     top: 5%;
     position: sticky;
 }
 
+.list-group-item {
+    display: flex !important;
+    padding: 5% 5% !important;
+}
+
+.div-imagenes-lista-carrito{
+    display: flex;
+    width: 120px;
+}
+
+#div-carrito-compras{
+    padding-right: 5%;
+}
+
 /*SECTION 2*/
+.div-iconos-lista-compra{
+    display: flex;
+    justify-content: space-between;
+}
+
+.div-sumar-producto{
+    width: 300px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
 .section-2{
     color: black;
     background-color: rgb(191, 44, 44);
@@ -102,15 +135,21 @@ h4{
     width: 40% !important;
 }
 
+.input-domicilio{
+    width: 86.7% !important;
+}
+
+.input-efectivo{
+    width: 86.7% !important;
+    margin-left: 6.5% !important;
+}
+
 .conteiner-forma-pago{
     display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    justify-content: space-evenly;
 }
 
 .div-forma-pago{
-    width: 87% !important;
     padding-top: 5%;
 }
 
@@ -129,7 +168,7 @@ h4{
     padding: 1% 4% 1% 4% !important;
 }
 
-span{
+.input-group-text{
     background-color: rgb(37, 34, 34) !important;
     border-color: black !important;
 }
@@ -142,4 +181,22 @@ span{
 
 input{
     border-color: black !important;
+}
+
+#totalCarrito{
+    font-weight: bold;
+    font-size: large;
+    padding-top: 2%;
+}
+
+/*FOOTER*/
+footer{
+    background-color: black;
+    text-align: center;
+    padding: 1% 1%;
+    color: rgba(255, 255, 255, 0.589);
+}
+
+.leyenda{
+    margin-bottom: 0rem;
 }

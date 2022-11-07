@@ -1,0 +1,14 @@
+[
+    {   "id": 1, 
+        "img": "./img/sumar.png", 
+        "operacion": "sumar"
+    },
+    {   "id": 2, 
+        "img": "./img/restar.png",
+        "operacion": "restar"
+    },
+    {   "id": 3, 
+        "img": "./img/basura.png", 
+        "operacion": "eliminarProd"
+    }
+]

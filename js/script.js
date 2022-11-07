@@ -1,5 +1,3 @@
-
-
 class Persona{
     constructor(apellido, nombre, dni){
         this.apellido = apellido;
@@ -31,7 +29,6 @@ class Cliente extends Persona{
     }
 }
 
-
 class metodoPago{
     constructor(tipo, nroTarjeta, codigoSeguridad, fechaVencimiento, nombre){
         this.tipo = tipo;
@@ -41,12 +38,23 @@ class metodoPago{
         this.nombre = nombre
     }
 }
-function Producto (id, tipo, nombre, precio, stock) {
+//function Producto (id, tipo, nombre, imagen, precio, stock) {
+
+function Producto (id, tipo, nombre, precio, stock, img) {
     this.id = id;
     this.tipo = tipo;
     this.nombre = nombre;
     this.precio = precio;
     this.stock = stock||0;
+    this.img = img;
+}
+
+class opcionesListaCompra{
+    constructor(id, img, operacion){
+        this.id = id;
+        this.img = img;
+        this.operacion = operacion;
+    }
 }
 
 class opcionMenu{
@@ -59,63 +67,234 @@ class opcionMenu{
         return (idxTieneStock !== -1);
     }
 };
-const opcionMenuPizzas = new opcionMenu(1, "Pizza");
+
+let nuestroCliente = new Cliente();
+
+let textoBusqueda = "";
+let inputBuscar = document.getElementById("textoABuscar");
+inputBuscar.addEventListener("change", ()=>{textoBusqueda = inputBuscar.value}) ;
+
+let botonBusqueda = document.getElementById("botonBuscar");
+botonBusqueda.addEventListener("click", buscarConincidenciaNombreProd);
+function buscarConincidenciaNombreProd(eventoBusqueda){
+    eventoBusqueda.preventDefault();
+    menuTiposProductos(0);
+}
+
+let botonCancelarBusqueda = document.getElementById("botonCancelarBuscar")
+botonCancelarBusqueda.addEventListener("click", cancelarBuscarConincidenciaNombreProd);
+function cancelarBuscarConincidenciaNombreProd(eventoBusqueda){
+    inputBuscar.value = "";
+    textoBusqueda = "";
+    menuTiposProductos(0);
+}
+
+
+let opcionesBotonesCarrito = [];
+fetch('./json/data.json')
+.then(response => response.json())
+.then((info)=> armarArrayBotonesCarrito(info))
+.catch((err) => { throw err });
+
+function armarArrayBotonesCarrito(lista){
+    for (const opciones of lista){
+        opcionesBotonesCarrito.push(opciones);
+    }
+    localStorage.setItem("arrayOperacionesCarrito", JSON.stringify(opcionesBotonesCarrito));
+}
+
+ 
+async function obtenerValorUSD(){
+    let valorUSDBlue = await fetch("https://www.dolarsi.com/api/api.php?type=valoresprincipales")
+    .then( response => response.json())
+    .then((objetoUSD)=> { return objetoUSD[1]['casa']['venta']});
+    localStorage.setItem("dolarBlue", parseFloat(valorUSDBlue))
+    return valorUSDBlue;
+}
+
+
+async function obtenerValorBtc(totalCarrito){
+    let dolarBlue = localStorage.getItem("dolarBlue").replace(',', '.');
+    let valorBtc = await fetch("https://api.coindesk.com/v1/bpi/currentprice.json")
+    .then( response => response.json())
+    .then((objetoBtc)=> {return objetoBtc.bpi.USD.rate_float});
+    localStorage.setItem("valorBTCUSD", valorBtc);
+    localStorage.setItem("valorBTCARG", (valorBtc * dolarBlue));
+    dolarBlue = parseFloat(valorBtc * parseFloat(dolarBlue)); // * dolarBlue;
+
+    totalAPagarInput.value = '฿ ' + totalCarrito / dolarBlue;
+    return valorBtc* dolarBlue;
+};
+
+const opcionMenuPizzas = new opcionMenu(1, "Pizzas");
 const opcionMenuEmpanadas = new opcionMenu(2, "Empanadas");
 const opcionMenuLomitos = new opcionMenu(3, "Lomitos");
-const opcionMenuFinalizarCompra = new opcionMenu(4, "Finalizar Compra")
-const opcionMenuCancelarCompra = new opcionMenu(5, "Cancelar Compra")
+//const opcionMenuPlatos = new opcionMenu(4, "Platos");
+
 
 let opcionesMenu = [];
 opcionesMenu.push(opcionMenuPizzas);
 opcionesMenu.push(opcionMenuEmpanadas);
 opcionesMenu.push(opcionMenuLomitos);
+//opcionesMenu.push(opcionMenuPlatos);
 
-function menuTiposProductos(){
-    let listaTiposProductos = "";
-    if (productosSeleccionados.length != 0){
-        listaTiposProductos = "¿Desea agregar algún otro producto a su compra?\n";
-    };
-    listaTiposProductos = listaTiposProductos.concat("Ingrese el numero del producto que desea comprar: ");
+
+function menuTiposProductos(idTipoProd){
+
+    let divContenedorTiposProd = document.getElementById("contenedorTiposProductos");
+    divContenedorTiposProd.innerHTML = "";
+
+    let tipoProdSeleccionDropDown = document.getElementById("seleccionDropDown");
+
+    let nombreProdSeleccionDropDown = "Todos Nuestros Productos";
+
+    let liNuevoFiltroTipoProd;
+    let dropDownFiltroTipoProd = document.getElementById("filtrosDropDown");
+    dropDownFiltroTipoProd.innerHTML = "";
+    liNuevoFiltroTipoProd = document.createElement("li");
+    liNuevoFiltroTipoProd.append(agregarMenuTipoProd(0, nombreProdSeleccionDropDown));
+    dropDownFiltroTipoProd.append(liNuevoFiltroTipoProd);
 
     for (const opcMenu of opcionesMenu){
-        let conStock = opcMenu.tieneStock();
-        listaTiposProductos = listaTiposProductos.concat("\n", opcMenu.id, "-", opcMenu.nombre)
-        if (!conStock){
-            listaTiposProductos = listaTiposProductos.concat("(Sin Stock)")
-        }
-    };
+        liNuevoFiltroTipoProd = document.createElement("li");
+        liNuevoFiltroTipoProd.append(agregarMenuTipoProd(opcMenu.id, opcMenu.nombre));
+        dropDownFiltroTipoProd.append(liNuevoFiltroTipoProd);
 
-    listaTiposProductos = listaTiposProductos.concat("\n", opcionMenuFinalizarCompra.id, "-", opcionMenuFinalizarCompra.nombre)
-    if(productosSeleccionados.length > 0){
-        listaTiposProductos = listaTiposProductos.concat("\n", opcionMenuCancelarCompra.id, "-", opcionMenuCancelarCompra.nombre)
-    }
-    listaTiposProductos = listaTiposProductos.concat("\n Total:$" , totalCompra());
-    return listaTiposProductos;
+        if ((opcMenu.id == idTipoProd) || (idTipoProd == 0)){
+            //let conStock = opcMenu.tieneStock();
+            let nuevaCardTipoPord = document.createElement("div");
+            nuevaCardTipoPord.id = "TipoProducto" + opcMenu.id;
+            let nuevoTituloTipoProd = document.createElement("h3");
+            nuevoTituloTipoProd.innerText = opcMenu.nombre;
+            nuevaCardTipoPord.appendChild(nuevoTituloTipoProd);
+            divContenedorTiposProd.append(nuevaCardTipoPord);
+            let divCardsPorTipoProd = document.createElement("div");
+            divCardsPorTipoProd.className = "div-cards";
+            divContenedorTiposProd.append(divCardsPorTipoProd);
+            if (opcMenu.id == idTipoProd) {
+                filtrarProductosPorTipoProd(idTipoProd)
+                nombreProdSeleccionDropDown = opcMenu.nombre;
+            } ;
+        };
+    };
+    if (idTipoProd == 0) {
+        filtrarProductosPorTipoProd(0)
+    } ;
+    tipoProdSeleccionDropDown = document.getElementById("seleccionDropDown");
+    tipoProdSeleccionDropDown.textContent = nombreProdSeleccionDropDown;
+
 }
 
-let arraySubMenu = [];
-function menuProductosSegunTipo(idTipoProducto){
-    let submenuProductos = 'Elige entre nuestras opciones:';
-    let arraySegunTipoProducto = arrayProductos.filter((prod)=>prod.tipo == idTipoProducto  && prod.stock > 0);
-    if (arraySegunTipoProducto.length > 0){
-        submenuProductos = submenuProductos.concat("\n0-Menu Anterior");
-        arraySubMenu = [];
-        let contador = 0;
-        for( prod of arraySegunTipoProducto){
-            contador +=1;
-            submenuProductos = submenuProductos.concat("\n", contador, "-", prod.nombre , " : $", prod.precio );
-            let prodSubMenu = new Producto(prod.id, idTipoProducto, prod.nombre, 0);
-            arraySubMenu.push(prodSubMenu);
-        }
+function agregarMenuTipoProd(idOpcion, nombreOpcion){
+    let aNuevoFiltroTipoProd;
+    aNuevoFiltroTipoProd = document.createElement("a");
+    aNuevoFiltroTipoProd.id = "idFiltroTipoProd"+idOpcion;
+    aNuevoFiltroTipoProd.classList.add("dropdown-item");
+    aNuevoFiltroTipoProd.setAttribute("idTipoProdFiltro", idOpcion);
+    aNuevoFiltroTipoProd.href = "#";
+    aNuevoFiltroTipoProd.innerText = nombreOpcion; 
+    aNuevoFiltroTipoProd.addEventListener("click", seleccionFiltroPorTipoProd)
+    return aNuevoFiltroTipoProd;
+}
+
+function seleccionFiltroPorTipoProd(eventoFiltro){
+    let tipoProdFiltrar = parseInt(eventoFiltro.target.getAttribute("idTipoProdFiltro"))||0;
+    inputBuscar.value = "";
+    textoBusqueda = "";
+    menuTiposProductos(tipoProdFiltrar);
+}
+
+let botonSiguiente = document.getElementById("siguiente");
+botonSiguiente.addEventListener("click", ValidarDatosSiguiente)
+
+function ValidarDatosSiguiente(){
+    let mensaje = "";
+    let datosControlar = document.getElementById("nombreInput");
+    (datosControlar.value == "")?mensaje = "*Nombre": nuestroCliente.Nombre = datosControlar.value   ;
+
+    datosControlar = document.getElementById("apellidoInput");
+    (datosControlar.value == "")?mensaje = ((mensaje != "")?mensaje + " ":"") + "*Apellido" : nuestroCliente.Apellido = datosControlar.value;
+
+    datosControlar = document.getElementById("domicilioInput");
+    (datosControlar.value == "")? mensaje = ((mensaje != "")?mensaje + " ":"") + "*Domicilio": nuestroCliente.Domicilio = datosControlar.value;
+
+
+    if(mensaje != ""){
+        mensaje = "Para continuar con la compra debe completar: " + mensaje;
+        Swal.fire(
+            'Falta muy poco para completar su pedido.',
+            mensaje,
+            'warning'
+          )
     }else{
-        submenuProductos = 'Opción incorrecta.';
-        submenuProductos = submenuProductos.concat("\n0-Menu Anterior");
+        Swal.fire(
+            nuestroCliente.nombre +', estamos preparando tu pedido. Gracias',
+            "Volve pronto!!!",
+            'success'
+        )
+
     }
-    return submenuProductos;
+}
+
+let opcionesFormasDePago = document.getElementById("pago-bitcoin");
+opcionesFormasDePago.addEventListener("click", funcionPagoCompra);
+
+opcionesFormasDePago = document.getElementById("opcion-pago-tarjeta");
+opcionesFormasDePago.addEventListener("click", funcionPagoCompra);
+
+
+opcionesFormasDePago = document.getElementById("pago-efectivo");
+opcionesFormasDePago.addEventListener("click", funcionPagoCompra);
+
+
+function funcionPagoCompra(evento){
+    let seleccionFormaDePago = document.getElementById("boton-opciones-compra");
+    let totalCarrito = localStorage.getItem("totalCompra");
+    switch (evento.target.id){
+        case "pago-bitcoin":{
+            seleccionFormaDePago.innerText = "Bitcoin";
+            totalAPagarInput.value = "Calculando valor actual de BTC...." ;
+
+            let timerInterval
+            Swal.fire({
+            title: 'Consultando valores actualizados de Bitcoin y del dolar!',
+            html: 'Tiempo restante<b></b> milliseconds.',
+            timer: 1100,
+            timerProgressBar: true,
+            didOpen: () => {
+                obtenerValorUSD();
+                setTimeout(() => { obtenerValorBtc(totalCarrito)}, 1000);
+                Swal.showLoading()
+                const b = Swal.getHtmlContainer().querySelector('b')
+                timerInterval = setInterval(() => {
+                b.textContent = Swal.getTimerLeft()
+                }, 100)
+            },
+            willClose: () => {
+                clearInterval(timerInterval)
+            }
+            }).then((result) => {
+            /* Read more about handling dismissals below */
+            if (result.dismiss === Swal.DismissReason.timer) {
+            }
+            })
+            
+            break;
+        }
+        case "opcion-pago-tarjeta":{
+            seleccionFormaDePago.innerText = "Tarjeta";
+            totalAPagarInput.value = "$" + totalCarrito * 1.10;
+            break;
+        }
+        case "pago-efectivo":{
+            seleccionFormaDePago.innerText = "Efectivo";
+            totalAPagarInput.value = "$" + totalCarrito;
+            break;
+        }
+    }
 }
 
 let productosSeleccionados = [];
-
 
 /*
 class Compra{
@@ -125,144 +304,268 @@ class Compra{
     }
 }
 */
-function SumarPedido(productoElegido){
-    if (productoElegido != null){
-        let tipoProd = opcionesMenu.find((op)=>op.id == productoElegido.tipo);
-        let cantidadProducto = prompt ("Ingrese la cantidad de " + tipoProd.nombre + " " + productoElegido.nombre + " " + "que desea comprar (stock = " + productoElegido.stock + ") : " )
-        
-        if (cantidadProducto <= productoElegido.stock){
 
-            productoElegido.stock = productoElegido.stock - cantidadProducto;
 
-            let seleccionAnterior = productosSeleccionados.some(otroProducto => otroProducto.id === productoElegido.id)
-            if (seleccionAnterior == true){
-                productosSeleccionados.forEach ((otroProducto) =>{
-                    if(otroProducto.id == productoElegido.id){
-                        otroProducto.cantidad = parseInt(otroProducto.cantidad) + parseInt(cantidadProducto);
-                        otroProducto.total = parseInt(otroProducto.cantidad) * otroProducto.precio;
-                        return;
+function SumarPedido(evento){
+    let idProductoSumarORestar = evento.target.getAttribute ("idProducto");
+    let sumarORestar = "sumar";
+    
+    evento.target.getAttribute("tipoOperacion") == "restar" && (sumarORestar = "restar");
+    evento.target.getAttribute("tipoOperacion") == "eliminarProd" && (sumarORestar = "eliminar");
+
+    let cardStockProdSeleccionado = document.getElementById("cardStock_"+ idProductoSumarORestar);
+    let stockProd = parseInt((localStorage.getItem("stock_" + idProductoSumarORestar) || 0));
+    switch (sumarORestar){
+        case "sumar":{
+            if (stockProd > 0){
+                productosSeleccionados.push(idProductoSumarORestar);
+                stockProd--;
+                Toastify({
+                    text: "Producto agregado",
+                    className: "info",
+                    style: {
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
                     }
-                })
+                }).showToast();
             }else{
-                productosSeleccionados.push({id: productoElegido.id, tipo: productoElegido.tipo, nombre: productoElegido.nombre, precio:productoElegido.precio, cantidad: parseInt(cantidadProducto), total:(cantidadProducto * productoElegido.precio)});
+                Swal.fire({
+                    icon: "error",
+                    title: "Producto sin stock",
+                    text: 'Pedimos disculpas por no poder satisfacer su necesidad.'
+                })
             }
-        }else{
-            alert("Stock insuficiente");
+            break;
         }
-    }else{
-        alert("Error al seleccionar el Producto");
-    }
+        case "restar":{
+            let posicionProdEliminar = productosSeleccionados.indexOf(idProductoSumarORestar);
+            productosSeleccionados.splice(posicionProdEliminar,1);
+            stockProd++;
+            Toastify({
+                text: "Producto restado",
+                className: "info",
+                style: {
+                    background: "linear-gradient(to right, #993300, #96c93d)",
+                }
+            }).showToast();            
+            
+            break;
+        }
+        case "eliminar":{
+            Swal.fire({
+                title: '¿Esta seguro de eliminar este Producto?',
+                text: "",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si. Eliminar Producto!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire(
+                    'Producto Eliminado!',
+                    '',
+                    'success'
+                    )
+                    let cantPordSelecc = productosSeleccionados.reduce((total, id)=> {return id === idProductoSumarORestar ? total +=1 : total}, 0);
+                    stockProd += cantPordSelecc;
+                    let productosSeleccAux = productosSeleccionados.filter((prod)=> prod != idProductoSumarORestar);
+                    productosSeleccionados = productosSeleccAux;
 
-};
-
-
-function totalCompra(){
-    return productosSeleccionados.reduce((acumulador, elemento)=>acumulador + elemento.total, 0);
+                    mostrarStockCard({cardStockSel: cardStockProdSeleccionado, idProdSel: idProductoSumarORestar, stockProdSel: stockProd});
+                }
+            })
+            break;
+        }
+    };
+    mostrarStockCard({cardStockSel: cardStockProdSeleccionado, idProdSel: idProductoSumarORestar, stockProdSel: stockProd});
 }
-function resumenCompra(){
-    let resumenPedido = "Resumen de su Pedido:";
-    productosSeleccionados.forEach((prodCompra) =>{
-        let tipoProd = opcionesMenu.find((op)=>op.id == prodCompra.tipo);
-        resumenPedido = resumenPedido.concat("\n",prodCompra.cantidad, " " , tipoProd.nombre, " ", prodCompra.nombre, " :$", prodCompra.total);
-    });
-    resumenPedido = resumenPedido.concat("\nEn total serían: $", totalCompra());
-    alert(resumenPedido);
+
+function mostrarStockCard(item){
+    // desestructuracion en parametros
+    const {cardStockSel, idProdSel, stockProdSel} = item; 
+    //console.log(item);
+    if (cardStockSel !== null){
+        cardStockSel.innerText = `(Stock:  ${stockProdSel}  )`;
+    };
+    localStorage.setItem("stock_" + idProdSel, stockProdSel);
+    localStorage.setItem("jsonProdSeleccionados", JSON.stringify(productosSeleccionados));
+    sinRepetidos()
 }
 
-let pizzaA = new Producto(1, 1, "Muzzarella", 800, 10)
-let pizzaB = new Producto(2, 1, "Napolitana", 850, 5)
-let empanadaA = new Producto(3, 2, "Arabes", 50, 11)
-let empanadaB = new Producto(4, 2, "Jamón y Queso", 70)
-let lomitoA = new Producto(5, 3, "Vegetariano", 900, 0)
-let lomitoB = new Producto(6, 3, "Común", 800, 0)
+function sumarProducto(eventoSumar){
+    SumarPedido(eventoSumar);
+}
 
-let arrayProductos = [pizzaA, pizzaB, empanadaA, empanadaB, lomitoA, lomitoB];
+let contenedorCarrito = document.getElementById("carrito-compras");
+let divContenedorListaCompra = document.getElementById("div-carrito-compras");
+
+function sinRepetidos(){
+
+    divContenedorListaCompra.innerHTML = "";
+    // spread
+    let productosNoRepetidos = [...new Set(productosSeleccionados)]; 
+    let totalCarrito = 0;
+    let divTotal = document.getElementById("totalCarrito");
+    divTotal.remove();
+
+    productosNoRepetidos.forEach((seleccionado) =>{
+        let prodClickeado = arrayProductos.find((cadaProd) =>{
+            if (seleccionado == cadaProd.id){
+                return cadaProd;
+            }
+        })
+        
+        let tipoProducto = opcionesMenu.find((cadaTipoProd) => {
+            if (prodClickeado.tipo == cadaTipoProd.id){
+                return cadaTipoProd;
+            }
+        })
+        
+        let cantidad = productosSeleccionados.reduce((total, id) => {
+            return id === seleccionado ? total += 1 : total
+        }, 0)
+        
+        totalCarrito += prodClickeado.precio*cantidad;
+
+        let contenedorListaCarrito = document.createElement("ul");
+        contenedorListaCarrito.classList.add("list-group");
+
+        let listaProductosCarrito = document.createElement("li");
+        listaProductosCarrito.classList.add("list-group-item", "div-iconos-lista-compra");
+        listaProductosCarrito.innerText = `${cantidad} ${tipoProducto.nombre} ${prodClickeado.nombre} $${prodClickeado.precio*cantidad}`;
+
+        let opcionesListaCarrito = document.createElement("div");
+        opcionesListaCarrito.classList.add("div-imagenes-lista-carrito");
+
+        let divProductoPedido = document.createElement("div");
+        divProductoPedido.classList.add("div-sumar-producto");
+
+        const arrayOpCarrito = JSON.parse(localStorage.getItem("arrayOperacionesCarrito"));
+        for (const opcionCarrito of arrayOpCarrito){
+            let imagenOpcion = document.createElement("img");
+            imagenOpcion.src = `${opcionCarrito.img}`;
+            imagenOpcion.id = 'imgSumar'+prodClickeado.id;
+            imagenOpcion.setAttribute("idProducto", prodClickeado.id);
+            imagenOpcion.setAttribute("tipoOperacion", opcionCarrito.operacion);
+            imagenOpcion.addEventListener("click", sumarProducto);
+            divProductoPedido.append(imagenOpcion);
+        }
+
+        opcionesListaCarrito.append(divProductoPedido);
+        listaProductosCarrito.append(opcionesListaCarrito);
+        contenedorListaCarrito.append(listaProductosCarrito);
+        divContenedorListaCompra.append(contenedorListaCarrito);
+        contenedorCarrito.append(divContenedorListaCompra);
+    })
+    divTotal = document.createElement("div");
+    divTotal.id = "totalCarrito";
+    divTotal.innerText = "TOTAL: $" + totalCarrito;
+    contenedorCarrito.append(divTotal);
+
+    localStorage.setItem("totalCompra", totalCarrito);
+
+    document.getElementById("totalAPagarInput").value = "$" + totalCarrito;
+
+
+
+    contenedorCarrito.style.height = "" + (200 + productosNoRepetidos.length * 80) + "px";
+}
+
+
+let pizzaA = new Producto(1, 1, "Muzzarella", 800, 10, ("./img/pizza1.png"));
+let pizzaB = new Producto(2, 1, "Napolitana", 850, 5, ("./img/pizza2.png"));
+let empanadaA = new Producto(3, 2, "Arabes", 50, 11, ("./img/empanada1.png"));
+let empanadaB = new Producto(4, 2, "Jamón y Queso", 70, 10, ("./img/empanada2.png"));
+let lomitoA = new Producto(5, 3, "Vegetariano", 900, 0, ("./img/lomito1.png"));
+let lomitoB = new Producto(6, 3, "Común", 800, 0, ("./img/lomito2.png"));
 /*
-let catalogo = document.getElementById("catalogo");
-
-for (const prod of arrayProductos){
-    let card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `<h2 class="tituloCard">Nombre: ${prod.nombre}</h2><p>Precio: $${prod.precio}</p>`
-    catalogo.append(card);
-}
+let PlatoA = new Producto(7, 4, "Común", 700, 15, "./img/lomito1.png");
+let PlatoB = new Producto(8, 4, "Común", 1000, 20, "./img/pizza2.png");
+let arrayProductos = [pizzaA, pizzaB, empanadaA, empanadaB, lomitoA, lomitoB, PlatoA, PlatoB];
 */
-let cicloCompra = true;
-while(cicloCompra) {
-    let tipoProductoElegido = prompt(menuTiposProductos());
-    if (tipoProductoElegido == "4"){
-        break;
+let arrayProductos = [pizzaA, pizzaB, empanadaA, empanadaB, lomitoA, lomitoB];
+
+
+//---------------------------------------------html y jscript----------------------------------------
+//CARDS
+
+
+function filtrarProductosPorTipoProd(idTipoProd){
+    let arrayFiltradosPorCoincidenciaNombreMenu = [];
+    if (idTipoProd == 0 && textoBusqueda.length > 0){
+        let arrayOpcionesMenuFiltrado = opcionesMenu.filter( (opcMenu) => opcMenu.nombre.toLowerCase().indexOf(textoBusqueda.toLocaleLowerCase()) > -1);
+        arrayFiltradosPorCoincidenciaNombreMenu = arrayProductos.filter((prod)=>{
+            if (arrayOpcionesMenuFiltrado.findIndex( (tprod)=> tprod.id == prod.tipo) > -1){
+                return prod;
+            }
+        })
     }
-    if (tipoProductoElegido == "5"){
-        productosSeleccionados.splice(0, productosSeleccionados.length);
-        break;
-    }
-    let productoElegidoPizza = prompt(menuProductosSegunTipo(tipoProductoElegido));
-    if (productoElegidoPizza == "0"){
-        continue;
-    }
-    if ((productoElegidoPizza <= arraySubMenu.length) && (productoElegidoPizza > 0)){
-        let productoSubMenu = arraySubMenu[parseInt(productoElegidoPizza-1)];
-        let productoAAgregar = arrayProductos.find((prod)=>prod.id == productoSubMenu.id);
-        SumarPedido(productoAAgregar);
-    }
-    else
-        alert("Seleccione una opción válida");
+    let arrayProductosMostrar = arrayProductos.filter((prod)=>{
+        if ( (prod.nombre.toLowerCase().indexOf(textoBusqueda.toLowerCase()) > -1) || 
+             (arrayFiltradosPorCoincidenciaNombreMenu.findIndex((prodFiltradoPorMenu)=> prodFiltradoPorMenu.id == prod.id ) > -1)){
+                return prod;
+             }
+        });
+    arrayProductosMostrar.forEach((prod) => {
+        if ((prod.tipo == idTipoProd) || (idTipoProd == 0)){
+            let contenedor;
+            contenedor = document.getElementById("TipoProducto"+prod.tipo);
+            //Contenedor card.tipo
+            let contenedorGeneral = document.getElementById("div_cards" + prod.tipo);
+            if (contenedorGeneral == null){
+                contenedorGeneral = document.createElement("div");
+                contenedorGeneral.classList.add("div-cards");
+                contenedorGeneral.id = "div_cards" + prod.tipo;
+            }
+            //Div Cards
+            let card = document.createElement("div");
+            card.classList.add("card");
+            card.innerHTML = `<img src="${prod.img}" alt=""></img>`;
+            //Body
+            let cardBody = document.createElement("div");
+            cardBody.classList.add("card-body");
+            //Text
+            let cardTitulo = document.createElement("h5");
+            cardTitulo.classList.add("card-title");
+            cardTitulo.innerText = prod.nombre;
+
+            let precio = document.createElement("p");
+            precio.classList.add("card-text");
+            precio.innerText = `$${prod.precio}`;
+
+            let stock = document.createElement("p");
+            stock.classList.add("card-text");
+
+            let stockStorage = localStorage.getItem("stock_" + prod.id);
+            if(stockStorage == null){
+                stockStorage = prod.stock;
+                localStorage.setItem("stock_" + prod.id, stockStorage );                
+            }
+            stock.innerText = `(Stock: ${stockStorage})`;
+            stock.id = "cardStock_" + prod.id;
+            //Boton
+            let botonSumarCarrito = document.createElement("button");
+            botonSumarCarrito.classList.add("btn","btn-primary");
+            botonSumarCarrito.innerText = "Comprar";
+            botonSumarCarrito.setAttribute("idProducto", prod.id);
+            botonSumarCarrito.addEventListener("click", SumarPedido);
+            //Appends
+            cardBody.append(cardTitulo);
+            cardBody.append(precio);
+            cardBody.append(stock);
+            cardBody.append(botonSumarCarrito);
+            card.append(cardBody);
+            contenedorGeneral.append(card);
+            contenedor.append(contenedorGeneral);
+
+        }
+    })
+}
+let objetoProductosSeleccionadosFromStorage = JSON.parse(localStorage.getItem("jsonProdSeleccionados"));
+if (objetoProductosSeleccionadosFromStorage !== null){
+    productosSeleccionados = objetoProductosSeleccionadosFromStorage;
 }
 
 
-if (productosSeleccionados.length > 0) {
-    resumenCompra();
-
-    let cicloDatos = true
-    let nombreCliente = "";
-    let apellidoCliente = "";
-    let direccionCliente = "";
-    
-    while (cicloDatos){
-        nombreCliente = prompt("Ingrese su Nombre: ");
-        apellidoCliente = prompt("Ingrese su Apellido: ");
-        if ((nombreCliente !="") && (apellidoCliente !="")){
-            console.log(nombreCliente + " " + apellidoCliente);
-        }else{
-            alert("Error: Vuelva a escribir su Nombre y Apellido");
-            continue;
-        }
-        cicloDatos = false;
-    }
-    let cliente = new Cliente(apellidoCliente, nombreCliente, null, null, null);
-    
-    cicloDatos = true;
-    
-    while (cicloDatos){
-        direccionCliente = prompt("Ingrese la dirección de su domicilio: ");
-        if (direccionCliente != ""){
-            console.log(direccionCliente);
-        }else{
-            alert("Error: Vuelva a ingresar su domicilio")
-            continue;
-        }
-        cicloDatos = false;
-    }
-    cliente.Domicilio = direccionCliente;
-    
-    let mensajeFormaPago = "Ingrese la forma de pago:";
-    let opcionesFormaPago = "\n1- En efectivo\n2- Transferencia";
-    let formaPago = prompt(mensajeFormaPago + opcionesFormaPago);
-    if (formaPago == 1){
-        opcionesFormaPago = "Efectivo";
-    }else{
-        opcionesFormaPago = "Transferencia";
-    }
-    
-    alert("Gracias por tu compra " + cliente.nombre);
-    document.getElementById("totalAPagarInput").value = "$" + totalCompra();
-    document.getElementById("formPagoInput").value = opcionesFormaPago;
-    document.getElementById("nombreInput").value = cliente.nombre;
-    document.getElementById("apellidoInput").value = cliente.apellido;
-    document.getElementById("domicilioInput").value = cliente.domicilio;
-
-} else {
-    alert("Gracias por tu visita. Te esperamos..")
-}
-
+sinRepetidos();
+menuTiposProductos(0);
